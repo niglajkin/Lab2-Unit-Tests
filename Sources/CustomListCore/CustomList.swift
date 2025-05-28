@@ -14,55 +14,146 @@ public final class CustomList<T> {
     public init() {}
 
     public func append(_ element: T) {
-        fatalError("TODO: implement append")
+        let node = Node(element)
+        if tail == nil {
+            head = node
+            tail = node
+        } else {
+            tail!.next = node
+            node.previous = tail
+            tail = node
+        }
+        length += 1
     }
 
     public func insert(_ element: T, at index: Int) throws {
-        fatalError("TODO: implement insert")
+        guard index >= 0 && index <= length else { throw ListError.indexOutOfBounds }
+
+        if index == length {                        
+            append(element)
+            return
+        }
+
+        let newNode = Node(element)
+        if index == 0 {                              
+            newNode.next = head
+            head?.previous = newNode
+            head = newNode
+        } else {                                     
+            let nodeAtIndex = try node(at: index)
+            let prev = nodeAtIndex.previous
+            prev?.next = newNode
+            newNode.previous = prev
+            newNode.next = nodeAtIndex
+            nodeAtIndex.previous = newNode
+        }
+        length += 1
     }
+
 
     @discardableResult
     public func delete(at index: Int) throws -> T {
-        fatalError("TODO: implement delete")
+        let node = try node(at: index)
+        let prev = node.previous
+        let next = node.next
+
+        if prev == nil { head = next } else { prev!.next = next }
+        if next == nil { tail = prev } else { next!.previous = prev }
+
+        length -= 1
+        return node.element
     }
 
     public func deleteAll(_ element: T) where T: Equatable {
-        fatalError("TODO: implement deleteAll")
+        var current = head
+        var idx = 0
+        while let node = current {
+            current = node.next
+            if node.element == element {
+                _ = try? delete(at: idx)
+                idx -= 1
+            }
+            idx += 1
+        }
     }
 
     public func get(_ index: Int) throws -> T {
-        fatalError("TODO: implement get")
+        try node(at: index).element
     }
 
     public func clone() -> CustomList<T> {
-        fatalError("TODO: implement clone")
+        let copy = CustomList<T>()
+        forEach { copy.append($0) }
+        return copy
     }
 
     public func reverse() {
-        fatalError("TODO: implement reverse")
+        var current = head
+        while let node = current {
+            swap(&node.next, &node.previous)
+            current = node.previous
+        }
+        swap(&head, &tail)
     }
 
     public func findFirst(_ element: T) -> Int where T: Equatable {
-        fatalError("TODO: implement findFirst")
+        var idx = 0
+        var current = head
+        while let node = current {
+            if node.element == element { return idx }
+            idx += 1
+            current = node.next
+        }
+        return -1
     }
 
     public func findLast(_ element: T) -> Int where T: Equatable {
-        fatalError("TODO: implement findLast")
+        var idx = length - 1
+        var current = tail
+        while let node = current {
+            if node.element == element { return idx }
+            idx -= 1
+            current = node.previous
+        }
+        return -1
     }
 
     public func clear() {
-        fatalError("TODO: implement clear")
+        head = nil
+        tail = nil
+        length = 0
     }
 
     public func extend(_ other: CustomList<T>) {
-        fatalError("TODO: implement extend")
+        other.forEach { append($0) }
     }
 
     public func forEach(_ callback: (T) -> Void) {
-        fatalError("TODO: implement forEach")
+        var cur = head
+        while let node = cur {
+            callback(node.element)
+            cur = node.next
+        }
     }
 
     private func node(at index: Int) throws -> Node {
-        fatalError("TODO: implement node(at:)")
+        guard index >= 0 && index < length else { throw ListError.indexOutOfBounds }
+
+        if index < length / 2 {
+            var cur = head
+            var i = 0
+            while i < index { cur = cur!.next; i += 1 }
+            return cur!
+        } else {
+            var cur = tail
+            var i = length - 1
+            while i > index { cur = cur!.previous; i -= 1 }
+            return cur!
+        }
+
     }
+}
+
+public enum ListError: Error {
+    case indexOutOfBounds
 }
