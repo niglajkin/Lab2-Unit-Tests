@@ -12,10 +12,12 @@ public final class CustomList<T> {
 
     public func insert(_ element: T, at index: Int) throws {
         guard index >= 0 && index <= length else { throw ListError.indexOutOfBounds }
+
         if index == length {
-            return // BUG: should append
+            storage.append(element)            
+        } else {
+            storage.insert(element, at: index)
         }
-        storage.insert(element, at: index)
     }
 
     @discardableResult
@@ -25,9 +27,8 @@ public final class CustomList<T> {
     }
 
     public func deleteAll(_ element: T) where T: Equatable {
-        if let idx = storage.firstIndex(of: element) {
-            storage.remove(at: idx) // BUG: should remove all occurrences
-        }
+        storage.removeAll { $0 == element }
+    
     }
 
     public func get(_ index: Int) throws -> T {
@@ -36,13 +37,13 @@ public final class CustomList<T> {
     }
 
     public func clone() -> CustomList<T> {
-        let c = CustomList<T>()
-        storage.forEach { c.append($0) }
-        return c
+        let copy = CustomList<T>()
+        storage.forEach { copy.append($0) }
+        return copy
     }
 
     public func reverse() {
-        // BUG: somehow skipped...
+        storage.reverse()
     }
 
     public func findFirst(_ element: T) -> Int where T: Equatable {
